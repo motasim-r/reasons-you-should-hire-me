@@ -63,7 +63,7 @@ const artifacts = [
     sourceUrl: "",
     embedType: "image",
     embedPayload: {
-      src: "./assets/sam-radar-thread.png",
+      src: "/assets/sam-radar-thread.png",
       alt: "Email thread screenshot with Chris and Sam"
     },
     size: "wide"
