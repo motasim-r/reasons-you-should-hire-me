@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Some random Granola moments from using, sharing, and advocating for Granola."
+    />
+    <title>some random granola moments (reasons you should hire me)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <h1>some random granola moments (reasons you should hire me)</h1>
+        <p class="hero-intro">
+          If you use Granola long enough it stops being "a meetings app", and
+          slowly becomes part of your life and how you think. after a few beers,
+          i've often been known to yap about granola to my friends
+        </p>
+      </header>
+
+      <section aria-label="Granola moments grid">
+        <div id="artifact-grid" class="artifact-grid"></div>
+      </section>
+    </main>
+
+    <template id="artifact-card-template">
+      <article class="artifact-card">
+        <div class="artifact-content">
+          <h3 class="artifact-title"></h3>
+          <p class="artifact-blurb"></p>
+          <p class="artifact-story"></p>
+          <a class="artifact-link" target="_blank" rel="noopener noreferrer">
+            View original post
+          </a>
+          <div class="artifact-embed" data-embed-container></div>
+          <p class="embed-note">
+            If the embed is blocked by privacy settings, use the source link.
+          </p>
+        </div>
+      </article>
+    </template>
+
+    <script src="./script.js" defer></script>
+  </body>
+</html>
