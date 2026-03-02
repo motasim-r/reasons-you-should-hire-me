@@ -1,5 +1,7 @@
 # some random granola moments
 
+Live site: [www.reasonsyoushouldhire.me](https://www.reasonsyoushouldhire.me/)
+
 Static one-page site for a Granola application, built with plain HTML/CSS/JS.
 
 ## Local preview
