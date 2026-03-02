@@ -1,4 +1,24 @@
-const artifacts = [
+const FEED_POST_SIZES = new Set(["feature", "wide", "tall", "square"]);
+const FEED_EMBED_TYPES = new Set(["linkedin", "tweet", "image", "none"]);
+
+// New posts are inserted at index 0 so the feed always renders newest-first.
+// New post template:
+// { id, title, blurb?, blurbHtml?, story?, sourceUrl?, sourceLabel?, embedType, embedPayload, size }
+const feedPosts = [
+  {
+    id: "yogurt",
+    title: "yogurt",
+    blurb:
+      "I vibe-coded a small fun mac app called yogurt. It uses granola MCP and openclaw to help you do some of the tasks you talk about in your meetings. In theory, it should be able to do anything openclaw can do like sending messages, scraping data etc.",
+    story:
+      "Right now it's a fun weekend project and nowhere near useful. I mainly built it to play around with granola MCP, openclaw and codex to see what might be possible.",
+    sourceUrl: "https://twitter.com/bebackinamo/status/2028478774220632530",
+    embedType: "tweet",
+    embedPayload: {
+      tweetUrl: "https://twitter.com/bebackinamo/status/2028478774220632530"
+    },
+    size: "wide"
+  },
   {
     id: "mr-granola",
     title: "Mr. Granola",
@@ -74,12 +94,29 @@ const template = document.querySelector("#artifact-card-template");
 const artifactGrid = document.querySelector("#artifact-grid");
 
 let masonryRaf = 0;
+let masonryObserver = null;
 
-renderArtifacts();
+renderFeed(getFeedPosts());
 initializeMasonry();
 
-function renderArtifacts() {
-  artifacts.forEach((artifact) => {
+function getFeedPosts() {
+  return [...feedPosts];
+}
+
+function prependFeedPost(post) {
+  const validatedPost = validateFeedPost(post);
+  feedPosts.unshift(validatedPost);
+  renderFeed(getFeedPosts());
+  return validatedPost;
+}
+
+function renderFeed(posts) {
+  if (!Array.isArray(posts)) {
+    return;
+  }
+
+  artifactGrid.innerHTML = "";
+  posts.forEach((post) => {
     const clone = template.content.cloneNode(true);
 
     const card = clone.querySelector(".artifact-card");
@@ -90,59 +127,90 @@ function renderArtifacts() {
     const embedContainer = clone.querySelector("[data-embed-container]");
     const embedNote = clone.querySelector(".embed-note");
 
-    card.classList.add(`size-${artifact.size}`);
-    card.id = `artifact-${artifact.id}`;
-    title.textContent = artifact.title;
-    if (artifact.blurbHtml) {
-      blurb.innerHTML = artifact.blurbHtml;
-    } else if (artifact.blurb) {
-      blurb.textContent = artifact.blurb;
+    card.classList.add(`size-${post.size}`);
+    card.id = `artifact-${post.id}`;
+    title.textContent = post.title;
+
+    if (post.blurbHtml) {
+      blurb.innerHTML = post.blurbHtml;
+    } else if (post.blurb) {
+      blurb.textContent = post.blurb;
     } else {
       blurb.remove();
     }
-    if (artifact.story) {
-      story.textContent = artifact.story;
+
+    if (post.story) {
+      story.textContent = post.story;
     } else {
       story.remove();
     }
-    if (artifact.sourceUrl) {
-      sourceLink.href = artifact.sourceUrl;
-      sourceLink.setAttribute("aria-label", `${artifact.title} source post`);
+
+    if (post.sourceUrl) {
+      sourceLink.href = post.sourceUrl;
+      sourceLink.textContent = post.sourceLabel || "View original post";
+      sourceLink.setAttribute("aria-label", `${post.title} source post`);
     } else {
       sourceLink.remove();
     }
 
-    if (artifact.embedType === "none") {
+    if (post.embedType === "none") {
       embedContainer.remove();
       embedNote.remove();
-    } else if (artifact.embedType === "image") {
+    } else if (post.embedType === "image") {
       embedNote.remove();
     }
 
     artifactGrid.appendChild(clone);
-    ensureEmbedLoaded(artifact, embedContainer);
+    ensureEmbedLoaded(post, embedContainer);
   });
 
+  observeCardsForMasonry();
   requestMasonryLayout();
 }
 
-function ensureEmbedLoaded(artifact, container) {
-  if (!artifact || !container) {
+function validateFeedPost(post) {
+  if (!post || typeof post !== "object") {
+    throw new Error("Feed post must be an object.");
+  }
+
+  ["id", "title", "embedType", "size"].forEach((fieldName) => {
+    if (typeof post[fieldName] !== "string" || post[fieldName].trim() === "") {
+      throw new Error(`Feed post is missing required field: ${fieldName}`);
+    }
+  });
+
+  if (!FEED_EMBED_TYPES.has(post.embedType)) {
+    throw new Error(`Unsupported embedType: ${post.embedType}`);
+  }
+
+  if (!FEED_POST_SIZES.has(post.size)) {
+    throw new Error(`Unsupported size: ${post.size}`);
+  }
+
+  if (post.embedType !== "none" && (!post.embedPayload || typeof post.embedPayload !== "object")) {
+    throw new Error("Feed post requires embedPayload when embedType is not 'none'.");
+  }
+
+  return { ...post };
+}
+
+function ensureEmbedLoaded(post, container) {
+  if (!post || !container) {
     return;
   }
 
-  if (artifact.embedType === "linkedin") {
-    renderLinkedInEmbed(container, artifact.embedPayload);
+  if (post.embedType === "linkedin") {
+    renderLinkedInEmbed(container, post.embedPayload);
     return;
   }
 
-  if (artifact.embedType === "tweet") {
-    renderTweetEmbed(container, artifact.embedPayload);
+  if (post.embedType === "tweet") {
+    renderTweetEmbed(container, post.embedPayload);
     return;
   }
 
-  if (artifact.embedType === "image") {
-    renderImageEmbed(container, artifact.embedPayload);
+  if (post.embedType === "image") {
+    renderImageEmbed(container, post.embedPayload);
   }
 }
 
@@ -221,13 +289,22 @@ function initializeMasonry() {
   window.addEventListener("load", requestMasonryLayout);
 
   if ("ResizeObserver" in window) {
-    const resizeObserver = new ResizeObserver(() => requestMasonryLayout());
-    artifactGrid.querySelectorAll(".artifact-card").forEach((card) => {
-      resizeObserver.observe(card);
-    });
+    masonryObserver = new ResizeObserver(() => requestMasonryLayout());
   }
 
+  observeCardsForMasonry();
   requestMasonryLayout();
+}
+
+function observeCardsForMasonry() {
+  if (!masonryObserver) {
+    return;
+  }
+
+  masonryObserver.disconnect();
+  artifactGrid.querySelectorAll(".artifact-card").forEach((card) => {
+    masonryObserver.observe(card);
+  });
 }
 
 function requestMasonryLayout() {
@@ -261,3 +338,7 @@ function applyMasonryLayout() {
     card.style.gridRowEnd = `span ${Math.max(span, 1)}`;
   });
 }
+
+window.getFeedPosts = getFeedPosts;
+window.prependFeedPost = prependFeedPost;
+window.renderFeed = renderFeed;
