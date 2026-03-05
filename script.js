@@ -8,10 +8,9 @@ const feedPosts = [
   {
     id: "yogurt",
     title: "yogurt",
-    blurb:
-      "I vibe-coded a small fun mac app called yogurt. It uses granola MCP and openclaw to help you do some of the tasks you talk about in your meetings. In theory, it should be able to do anything openclaw can do like sending messages, scraping data etc.",
-    story:
-      "Right now it's a fun weekend project and nowhere near useful. I mainly built it to play around with granola MCP, openclaw and codex to see what might be possible.",
+    blurbHtml:
+      "I built a small mac app called yogurt.<br><br>It can do anything openclaw does but with the meetgranola MCP, it helps you do tasks you talk about in your meetings.<br><br>It's quite fun! I mainly built it to play around with granola MCP, openclaw and codex to see what might be possible.",
+    story: "",
     sourceUrl: "https://twitter.com/bebackinamo/status/2028478774220632530",
     embedType: "tweet",
     embedPayload: {
