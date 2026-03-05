@@ -9,7 +9,7 @@ const feedPosts = [
     id: "yogurt",
     title: "yogurt",
     blurbHtml:
-      "I built a small mac app called yogurt.<br><br>It can do anything openclaw does but with the meetgranola MCP, it helps you do tasks you talk about in your meetings.<br><br>It's quite fun! I mainly built it to play around with granola MCP, openclaw and codex to see what might be possible.",
+      "I built a small mac app called yogurt.<br><br>It can do anything openclaw does but with the granola MCP, it helps you do tasks you talk about in your meetings.<br><br>It's quite fun! I mainly built it to play around with granola MCP, openclaw and codex to see what might be possible.",
     story: "",
     sourceUrl: "https://twitter.com/bebackinamo/status/2028478774220632530",
     embedType: "tweet",
